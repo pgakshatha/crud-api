@@ -10,13 +10,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                echo 'Checking out source code...'
-                git branch: 'main', url: 'https://github.com/pgakshatha/crud-api.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
@@ -26,10 +19,10 @@ pipeline {
 
         stage('Login to Amazon ECR') {
             steps {
+                echo 'Logging into Amazon ECR...'
                 sh '''
-                aws ecr get-login-password --region ap-south-1 | \
-                docker login --username AWS --password-stdin \
-                218014315199.dkr.ecr.ap-south-1.amazonaws.com
+                    aws ecr get-login-password --region $AWS_REGION | \
+                    docker login --username AWS --password-stdin $ECR_REGISTRY
                 '''
             }
         }
@@ -38,8 +31,8 @@ pipeline {
             steps {
                 echo 'Tagging Docker image...'
                 sh '''
-                docker tag crud-api:latest \
-                $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+                    docker tag crud-api:latest \
+                    $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
                 '''
             }
         }
@@ -48,8 +41,8 @@ pipeline {
             steps {
                 echo 'Pushing Docker image to Amazon ECR...'
                 sh '''
-                docker push \
-                $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+                    docker push \
+                    $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
                 '''
             }
         }
@@ -62,6 +55,10 @@ pipeline {
 
         failure {
             echo 'Pipeline failed!'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
