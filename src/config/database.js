@@ -7,6 +7,10 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
+
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 pool.connect()
@@ -14,7 +18,7 @@ pool.connect()
     console.log("✅ Connected to PostgreSQL");
   })
   .catch((err) => {
-    console.error("❌ Database Connection Failed:", err.message);
+    console.error("❌ Database Connection Failed:", err);
   });
 
 module.exports = pool;
