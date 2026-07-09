@@ -27,6 +27,29 @@ const createUser = async (req, res) => {
   }
 };
 
+// Get All Users
+const getAllUsers = async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM users ORDER BY id ASC"
+    );
+
+    res.status(200).json({
+      success: true,
+      count: result.rowCount,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createUser,
+  getAllUsers,
 };
