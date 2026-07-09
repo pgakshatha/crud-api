@@ -1,6 +1,7 @@
 const express = require("express");
 const pool = require("./config/database");
 const userRoutes = require("./routes/userRoutes");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -36,4 +37,5 @@ app.get("/health", async (req, res) => {
   }
 });
 
+app.use(errorHandler);
 module.exports = app;

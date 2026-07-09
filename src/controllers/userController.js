@@ -1,7 +1,7 @@
 const pool = require("../config/database");
 
 // Create User
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
     const { name, email } = req.body;
 
@@ -18,17 +18,12 @@ const createUser = async (req, res) => {
       data: result.rows[0],
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
 // Get All Users
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res, next) => {
   try {
     const result = await pool.query(
       "SELECT * FROM users ORDER BY id ASC"
@@ -40,17 +35,12 @@ const getAllUsers = async (req, res) => {
       data: result.rows,
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
 // Get User By ID
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -71,17 +61,12 @@ const getUserById = async (req, res) => {
       data: result.rows[0],
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
 // Update User
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, email } = req.body;
@@ -108,19 +93,13 @@ const updateUser = async (req, res) => {
       message: "User updated successfully",
       data: result.rows[0],
     });
-
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
 // Delete User
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -141,14 +120,8 @@ const deleteUser = async (req, res) => {
       message: "User deleted successfully",
       data: result.rows[0],
     });
-
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
