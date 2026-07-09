@@ -5,6 +5,7 @@ const {
   createUser,
   getAllUsers,
   getUserById,
+  updateUser,
 } = require("../controllers/userController");
 
 router.post("/", createUser);
@@ -12,5 +13,7 @@ router.post("/", createUser);
 router.get("/", getAllUsers);
 
 router.get("/:id", getUserById);
+
+router.put("/:id", updateUser);
 
 module.exports = router;

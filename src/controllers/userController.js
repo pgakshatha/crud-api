@@ -80,8 +80,48 @@ const getUserById = async (req, res) => {
   }
 };
 
+// Update User
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email } = req.body;
+
+    const query = `
+      UPDATE users
+      SET name = $1,
+          email = $2
+      WHERE id = $3
+      RETURNING *;
+    `;
+
+    const result = await pool.query(query, [name, email, id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: result.rows[0],
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createUser,
   getAllUsers,
   getUserById,
+  updateUser,
 };
