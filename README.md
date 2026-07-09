@@ -1,22 +1,40 @@
-# Multi-Auth Service
+# DevOps Deployment Documentation
 
-## Overview
+## Serviots DevOps Engineer Technical Assessment
 
-This project is part of the Serviots DevOps Engineer Technical Assessment.
+**Candidate:** Akshatha P G
 
-The objective was to deploy two independent applications on the same AWS EC2 instance using Docker, Jenkins, Nginx, PostgreSQL RDS, and Amazon ECR while maintaining complete deployment automation through CI/CD pipelines.
+---
 
-Application 1:
-- CRUD API
-- Node.js
-- PostgreSQL
+# Project Overview
 
-Application 2:
-- Multi-Auth Service
-- Express.js
+This project demonstrates the deployment of two independent applications on a single AWS EC2 instance using Docker, Jenkins, Amazon ECR, PostgreSQL RDS, and Nginx Reverse Proxy.
+
+## Applications
+
+### Application 1
+CRUD API
+
+- Backend: Node.js + Express.js
+- Database: PostgreSQL
+- Dockerized
+- Jenkins CI/CD
+- Amazon ECR
+- EC2 Deployment
+
+---
+
+### Application 2
+Multi-Auth Service
+
+- Backend: Node.js + Express.js
 - Prisma ORM
 - PostgreSQL
 - JWT Authentication
+- Dockerized
+- Jenkins CI/CD
+- Amazon ECR
+- EC2 Deployment
 
 ---
 
@@ -27,55 +45,38 @@ Application 2:
                        │
                 GitHub Webhook
                        │
-                   Jenkins
-          ┌────────────┴────────────┐
-          │                         │
-     CRUD API Pipeline      Multi-Auth Pipeline
-          │                         │
-          ▼                         ▼
-      Docker Build             Docker Build
-          │                         │
-          ▼                         ▼
-        Amazon ECR              Amazon ECR
-          │                         │
-          └────────────┬────────────┘
+                    Jenkins
+         ┌─────────────┴─────────────┐
+         │                           │
+   CRUD API Pipeline         Multi-Auth Pipeline
+         │                           │
+         ▼                           ▼
+    Docker Build               Docker Build
+         │                           │
+         ▼                           ▼
+      Amazon ECR                Amazon ECR
+         │                           │
+         └─────────────┬─────────────┘
                        ▼
-                   AWS EC2
-          ┌────────────┴────────────┐
-          │                         │
-     CRUD API Container     Multi-Auth Container
-        Port 5000              Port 5001
-          │                         │
-          └────────────┬────────────┘
+                  AWS EC2
+         ┌─────────────┴─────────────┐
+         │                           │
+   CRUD API Container         Multi-Auth Container
+      Port 5000                  Port 5001
+         │                           │
+         └─────────────┬─────────────┘
                        ▼
                      Nginx
                        │
                        ▼
-                 Public Access
+                Public Access
 ```
 
 ---
 
-# Technology Stack
+# AWS Infrastructure
 
-- AWS EC2
-- AWS RDS PostgreSQL
-- Amazon ECR
-- Docker
-- Jenkins
-- GitHub
-- GitHub Webhooks
-- Nginx
-- Express.js
-- Prisma ORM
-- PostgreSQL
-- JWT Authentication
-
----
-
-# Infrastructure
-
-## EC2
+## Amazon EC2
 
 - Ubuntu 24.04 LTS
 - Docker Installed
@@ -84,29 +85,18 @@ Application 2:
 
 ---
 
-## Database
+## Amazon RDS
 
-AWS RDS PostgreSQL
+PostgreSQL
 
-Separate databases are used for each application.
+Two separate databases
 
-Database 1
-
-CRUD API Database
-
-Database 2
-
-Multi-Auth Database
-
-This provides complete logical separation between applications while minimizing infrastructure cost by using a single RDS instance.
+- crud_db
+- multiauth_db
 
 ---
 
-# Docker
-
-Each application has its own Dockerfile.
-
-Docker Images are stored in Amazon ECR.
+## Amazon ECR
 
 Repositories
 
@@ -115,110 +105,112 @@ Repositories
 
 ---
 
-# Jenkins
+# Docker
 
-Two independent Jenkins Pipelines were created.
+Each application has its own Dockerfile.
 
-Pipeline 1
+Containers
 
-CRUD API
+| Application | Internal Port | Host Port |
+|-------------|--------------|----------|
+| CRUD API | 5000 | 5000 |
+| Multi-Auth | 5000 | 5001 |
 
-Stages
+---
 
-- Checkout
-- Build Docker Image
-- Login to Amazon ECR
-- Push Docker Image
-- Deploy Container
-- Health Check
-- Cleanup
+# Jenkins CI/CD
 
-Pipeline 2
+Two independent pipelines were created.
 
-Multi-Auth
+## CRUD API Pipeline
 
-Stages
+1. Checkout Source
+2. Build Docker Image
+3. Login to Amazon ECR
+4. Push Docker Image
+5. Pull Latest Image
+6. Deploy Container
+7. Health Check
+8. Cleanup
 
-- Checkout
-- Build Docker Image
-- Prisma Migration
-- Login to Amazon ECR
-- Push Docker Image
-- Deploy Container
-- Health Check
-- Cleanup
+---
 
-GitHub Webhooks trigger both pipelines automatically after every push.
+## Multi-Auth Pipeline
+
+1. Checkout Source
+2. Build Docker Image
+3. Prisma Migration
+4. Login to Amazon ECR
+5. Push Docker Image
+6. Pull Latest Image
+7. Deploy Container
+8. Health Check
+9. Cleanup
+
+---
+
+# GitHub Webhooks
+
+Both repositories are integrated with GitHub Webhooks.
+
+Whenever code is pushed to the repository:
+
+GitHub
+
+↓
+
+Webhook
+
+↓
+
+Jenkins
+
+↓
+
+Automatic Deployment
 
 ---
 
 # Nginx Reverse Proxy
 
-Both applications are deployed on the same EC2 instance.
-
-Nginx routes incoming traffic without port conflicts.
-
-Routing
-
-CRUD API
+Nginx routes incoming traffic.
 
 ```
 /
 ```
 
-Multi-Auth
+↓
+
+CRUD API
 
 ```
 /auth/*
 ```
 
----
+↓
 
-# Environment Variables
-
-Application configuration is managed using environment variables.
-
-No secrets or credentials are committed to Git.
-
-Environment files are stored only on the deployment server.
-
-Example
-
-```
-PORT=
-
-DATABASE_URL=
-
-JWT_PRIVATE_KEY=
-
-JWT_PUBLIC_KEY=
-
-CORS_ORIGIN=
-
-COOKIE_DOMAIN=
-```
+Multi-Auth
 
 ---
 
 # Security
 
-Security measures implemented
+Implemented Security Features
 
-- Docker container isolation
-- Environment Variables
+- Docker Isolation
 - JWT Authentication
 - HTTP Only Cookies
-- Helmet Middleware
-- XSS Protection
-- CORS
-- Nginx Reverse Proxy
-- SSH restricted to trusted IP
-- RDS accessible only from EC2 Security Group
+- Helmet
+- Environment Variables
+- PostgreSQL RDS
+- Security Groups
+- SSH restricted to administrator IP
 
 ---
 
-# CI/CD Flow
+# Deployment Flow
 
+```
 Developer
 
 ↓
@@ -247,7 +239,11 @@ Amazon ECR
 
 ↓
 
-EC2 Deployment
+AWS EC2
+
+↓
+
+Docker Deployment
 
 ↓
 
@@ -256,148 +252,59 @@ Health Check
 ↓
 
 Application Live
-
----
-
-# Health Checks
-
-CRUD API
-
-```
-GET /
-```
-
-Response
-
-```
-{
-    "success": true,
-    "message": "CRUD API is running"
-}
-```
-
-Multi-Auth
-
-```
-GET /health
-```
-
-Response
-
-```
-{
-    "status": true,
-    "message": "Multi-Auth Service is Healthy"
-}
 ```
 
 ---
 
-# API Endpoints
+# Public Endpoints
 
-Signup
-
-```
-POST /auth/signup
-```
-
-Login
+## CRUD API
 
 ```
-POST /auth/login
-```
-
-Refresh Token
-
-```
-POST /auth/refresh
-```
-
-Verify Token
-
-```
-GET /auth/verify
-```
-
-Logout
-
-```
-POST /auth/logout
-```
-
-Health
-
-```
-GET /health
+http://13.235.241.150/
 ```
 
 ---
 
-# Port Usage
+## Multi-Auth
 
-| Port | Purpose |
-|-------|----------|
-|22|SSH|
-|80|HTTP|
-|443|HTTPS (Optional)|
-|9090|Jenkins|
-|5000|CRUD API Container|
-|5001|Multi-Auth Container|
+```
+http://13.235.241.150/auth/login
+```
 
----
+```
+http://13.235.241.150/auth/signup
+```
 
-# Deployment Strategy
-
-The deployment process follows these steps.
-
-1. Push code to GitHub.
-2. GitHub Webhook triggers Jenkins.
-3. Jenkins builds Docker Image.
-4. Docker Image pushed to Amazon ECR.
-5. EC2 pulls latest image.
-6. Existing container stopped.
-7. New container started.
-8. Health check executed.
-9. Application becomes available.
+```
+http://13.235.241.150/auth/verify
+```
 
 ---
 
-# Database Strategy
+# AWS Services Used
 
-A single AWS RDS PostgreSQL instance is used with two independent databases.
-
-Advantages
-
-- Lower AWS Cost
-- Easy Management
-- Logical Isolation
-- Separate Credentials
-- Independent Application Data
-
----
-
-# Rollback Strategy
-
-If deployment fails or health checks do not pass, the deployment pipeline can be configured to redeploy the previous stable Docker image stored in Amazon ECR.
-
-This minimizes downtime and ensures application availability.
+- Amazon EC2
+- Amazon RDS PostgreSQL
+- Amazon ECR
+- IAM
+- Security Groups
 
 ---
 
 # Future Improvements
 
-- HTTPS using Let's Encrypt
 - Automatic Rollback
-- Prometheus Monitoring
-- Grafana Dashboard
-- CloudWatch Logs
-- Docker Compose
-- Kubernetes Deployment
+- HTTPS using Let's Encrypt
+- Prometheus
+- Grafana
+- Kubernetes
+- CloudWatch Monitoring
 
 ---
 
 # Author
 
-Akshatha P G
+**Akshatha P G**
 
 DevOps Engineer
